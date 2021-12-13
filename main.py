@@ -3,3 +3,10 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import tqdm
 import copy
+
+aowrhgoawrhgioaweg
+rwoguhaiowehgW]E
+GAPIWEHGouwehga
+wegIOWEHGIOweg
+awgiHWEIOGAW
+EUGBUIGBUI;GUG
