@@ -36,4 +36,4 @@ if __name__=='__main__':
 	v=np.random.randint(1,500,1000) #宝物价值
 	res=bag(n,c,w,v)
 	show(n,c,w,res)
-    
+
