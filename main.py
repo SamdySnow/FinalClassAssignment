@@ -37,4 +37,3 @@ if __name__=='__main__':
 	res=bag(n,c,w,v)
 	show(n,c,w,res)
 
-
