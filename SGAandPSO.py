@@ -14,18 +14,18 @@ def initial(individuals,bits):
     return np.random.randint(0,2,(individuals,bits),dtype=int)
 
 def fitness(individuals,weight,price,package_weight):
-    price_res = np.zeros(len(weight))
+    price_res = np.zeros(len(individuals))
     for i,individual in enumerate(individuals):
         temp_weight = 0
         temp_price = 0
-        for index in np.nonzero(individual):
-            temp_weight += weight[index]
-            temp_price += price[index]
-        price_res[i] = temp_price if temp_weight <= package_weight else 0
+        for index in np.nonzero(individual)[0]:
+            temp_weight = temp_weight + weight[index]
+            temp_price = temp_price + price[index]
+        price_res[i] = temp_price if temp_weight <= package_weight else 1e-15
     return price_res
 
 def roulette_wheel_selection(individuals,fit_res):
-    index = np.random.choice(np.arange(individuals), size=individuals, replace=True,p=(fit_res)/(fit_res.sum()))
+    index = np.random.choice(np.arange(len(individuals)), size=len(individuals), replace=True,p=(fit_res)/(fit_res.sum()))
     return individuals[index]
 
 def two_point_crossover(individuals,bits,group,crossover_rate = 0.8):
@@ -49,22 +49,24 @@ def point_variation(bits,group,p=0.005):
     return group   
 
 def update_vx(v,x,p_best,g_best):
+    new_x = x.copy()
     for k,ind in enumerate(v):
-        for i in range(ind):
+        for i in range(len(ind)):
             ind[i] = ind[i] + np.random.rand()*(p_best[k][i] - ind[i]) + np.random.rand()*(g_best[i] - ind[i])
             if np.random.rand() <= 1/(1+math.exp(-ind[i])):
-                x[k][i] = 1
+                new_x[k][i] = 1
             else:
-                x[k][i] = 0
-    return v,x
+                new_x[k][i] = 0
+    return v,new_x
 
 def update_pg(x,fit_res,p_best,g_best,w,p,pa):
     temp_fit = fitness(p_best,w,p,pa)
-    for i in range(p_best):
+    best_fit = fitness([g_best],w,p,pa)[0]
+    for i in range(len(p_best)):
         if fit_res[i] > temp_fit[i]:
             p_best[i] = x[i]
     temp_arg_g = np.argmax(temp_fit)
-    if np.max(temp_fit) > g_best:
+    if np.max(temp_fit) > best_fit:
         g_best = x[temp_arg_g]
     return p_best,g_best
 
@@ -113,18 +115,19 @@ def SGA(package_weight,weight,price,individuals = None,iters = 100,crossover=0.8
     end_max.append(np.max(fit_result))
     end_ave.append(np.mean(fit_result))
     for it in range(iters):
-        next_group = roulette_wheel_selection(individuals,fit_result)
-        new_group = point_variation(dimension,two_point_crossover(individuals,dimension,next_group,crossover),variation)
-        fit_result = fitness(new_group)
+        next_group = roulette_wheel_selection(init_group,fit_result)
+        new_group = point_variation(dimension,two_point_crossover(init_individual,dimension,next_group,crossover),variation)
+        fit_result = fitness(new_group,weight,price,package_weight)
         end_max.append(np.max(fit_result))
         end_ave.append(np.mean(fit_result))
+        init_group = new_group
     plt.plot(end_max,'r-')
     plt.plot(end_ave,'b-')
     plt.xlabel('iteration')  
     plt.ylabel('fitness')  
     plt.title('fitness curve')  
     plt.show()
-    return np.array(end_max)
+    return np.array(np.max(end_max))
 
 def DPSO(package_weight,weight,price,individuals = None,iters = 100):
     """
@@ -173,17 +176,22 @@ def DPSO(package_weight,weight,price,individuals = None,iters = 100):
     g_best = np.zeros(dimension)
     p_best = init_group
     g_best = init_group[np.argmax(fit_result)]
-    speed = np.random.rand((individuals,dimension))
+    speed = np.random.randint(0,10,(individuals,dimension))/10
     for it in range(iters):
-        speed,new_x = update_vx(speed,init_group,p_best,g_best)
+        new_speed,new_x = update_vx(speed,init_group,p_best,g_best)
         new_fit = fitness(new_x,weight,price,package_weight)
-        p_best,g_best = update_pg(new_x,new_fit,p_best,g_best)
-        end_max.append(np.max(fit_result))
-        end_ave.append(np.mean(fit_result))
+        for i in range(len(new_fit)):
+            if new_fit[i] > fit_result[i]:
+                init_group[i] = new_x[i]
+        p_best,g_best = update_pg(new_x,new_fit,p_best,g_best,weight,price,package_weight)
+        end_max.append(np.max(new_fit))
+        end_ave.append(np.mean(new_fit))
+        speed = new_speed
+        fit_result = new_fit
     plt.plot(end_max,'r-')
     plt.plot(end_ave,'b-')
     plt.xlabel('iteration')  
     plt.ylabel('fitness')  
     plt.title('fitness curve')  
     plt.show()
-    return np.array(end_max)
+    return np.array(np.max(end_max))
