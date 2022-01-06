@@ -28,15 +28,24 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
     输入：
     ------------------------------------------------
     初始解集init[dimensionality] 请确保初始解集合法
+    
     重量weight[dimensionality]
+    
     价值price[dimensionality]
+
     背包容量pw，默认为 0
+
     初始温度T，默认为 200
+
     退火率af 默认为 0.95
+
     迭代次数time 默认为 20
+
     平衡次数balance 默认为 5
+    
     ------------------------------------------------
     输出：
+    ------------------------------------------------
     解集res[dimensionality]
     '''
     c = len(init) - 1
@@ -89,7 +98,7 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
             
         T = T*af #温度下降
         if T < 10:
-            print('到达最小温度阈值')
+            #print('到达最小温度阈值')
             break #到达最小温度阈值
     
     return best
@@ -107,6 +116,7 @@ if __name__ == '__main__':
     best = saa(init=init, weight=weight, price=price, pw=pw, time=1000, T=50000,af = 0.95,balance=20)
     print('最优解为',calc_price(best,price))
     print('背包重量',calc_weight(best,weight))
+    saa()
         
             
 
