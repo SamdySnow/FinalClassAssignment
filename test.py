@@ -8,5 +8,4 @@ f = json.load(open("testdata/testdata(9).json"))
 data = f["data8"]
 weight = data["weight"]
 price = data["price"]
-
-pso.pso(weight,price,b_=1173,iteration_=300)
+pso.pso(weight,price,pack_weight=1173,iteration_=300)
