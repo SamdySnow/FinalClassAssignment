@@ -1,7 +1,7 @@
 import random
 import math
 import copy
-from matplotlib import pyplot as plt
+import numpy as np
 
 def calc_price(solv,price):
     #计算背包价值
@@ -22,14 +22,12 @@ def calc_weight(slove,weight):
     return res
 
 
-def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, time = 20, balance = 5,minT = 0):
+def SAA(weight = None, price = None, pw = 0, T = 200, af = 0.95, time = 20, balance = 5, bestt = None):
     '''
     模拟退火算法
     ------------------------------------------------
     输入：
     ------------------------------------------------
-    初始解集init[dimensionality] 请确保初始解集合法
-    
     重量weight[dimensionality]
     
     价值price[dimensionality]
@@ -51,6 +49,7 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
     ------------------------------------------------
     解集res[dimensionality]
     '''
+    init = [0] * len(weight)
     c = len(init) - 1
     best = copy.deepcopy(init) #全局最优解
     now = copy.deepcopy(init)
@@ -102,30 +101,29 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
                         now = copy.deepcopy(test)
             
         T = T*af #温度下降
-        if T < minT:
-            #print('到达最小温度阈值')
-            break #到达最小温度阈值
-
-        best_price_list.append(calc_price(best,price))
-
-    plt.plot(best_price_list)
-    plt.show()
-    return best
+        # if T < minT:
+        #     #print('到达最小温度阈值')
+        #     break #到达最小温度阈值
+        
+        if bestt:
+            if np.abs(now_price-bestt) <= 0.01*bestt:
+                break
+    return calc_price(best,price)
             
                         
-if __name__ == '__main__':
-    #使用示例
+# if __name__ == '__main__':
+#     #使用示例
 
-    weight = [135, 133, 130, 11, 128, 123, 20, 75, 9, 66, 105, 43, 18, 5, 37, 90, 22, 85, 9, 80, 70, 17, 60, 35, 57, 35, 61, 40,
-              8, 50, 32, 40, 72, 35, 100, 2, 7, 19, 28, 10, 22, 27, 30, 88, 91, 47, 68, 108, 10, 12, 43, 11, 20, 37, 17, 4, 3, 21, 10, 67]
-    price = [199,194,193,191,189,178,174,169,164,164,161,158,157,154,152,152,149,142,131,125,124,124,124,122,119,116,114,113,111,110,109,100,97,94,91,82,82,81,80,80,80,79,77,76,74,72,71,70,69,68,65,65,61,56,55,54,53,47,47,46,41,36,34,32,32,30,29,29,26,25,23,22,20,11,10,9,5,4,3,1]
-    init = [0] * len(weight)
-    pw = 1173
+#     weight = [135, 133, 130, 11, 128, 123, 20, 75, 9, 66, 105, 43, 18, 5, 37, 90, 22, 85, 9, 80, 70, 17, 60, 35, 57, 35, 61, 40,
+#               8, 50, 32, 40, 72, 35, 100, 2, 7, 19, 28, 10, 22, 27, 30, 88, 91, 47, 68, 108, 10, 12, 43, 11, 20, 37, 17, 4, 3, 21, 10, 67]
+#     price = [199,194,193,191,189,178,174,169,164,164,161,158,157,154,152,152,149,142,131,125,124,124,124,122,119,116,114,113,111,110,109,100,97,94,91,82,82,81,80,80,80,79,77,76,74,72,71,70,69,68,65,65,61,56,55,54,53,47,47,46,41,36,34,32,32,30,29,29,26,25,23,22,20,11,10,9,5,4,3,1]
+#     init = [0] * len(weight)
+#     pw = 1173
 
-    best = saa(init=init, weight=weight, price=price, pw=pw,T=400,time=80,af = 0.65, balance = 20)
-    print('最优解为',calc_price(best,price))
-    print('背包重量',calc_weight(best,weight))
-    
+#     best = SAA(init=init, weight=weight, price=price, pw=pw, time=1000, T=50000,af = 0.95,balance=20)
+#     print('最优解为',calc_price(best,price))
+#     print('背包重量',calc_weight(best,weight))
+#     SAA()
         
             
 

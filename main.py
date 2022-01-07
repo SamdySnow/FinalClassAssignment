@@ -1,39 +1,39 @@
+import SGA as sp
+import SA as sa
+import pso as pso
+import greed as gr
+import FA as fa
 import numpy as np
-import pandas as pd
+import json
+import time
 from matplotlib import pyplot as plt
-from tqdm import tqdm 
-import copy
 
-def bag(n,c,w,v):
-	res=[[-1 for j in range(c+1)] for i in range(n+1)]
-	for j in range(c+1):
-		res[0][j]=0
-	for i in tqdm(range(1,n+1)):
-		for j in range(1,c+1):
-			res[i][j]=res[i-1][j]
-			if j>=w[i-1] and res[i][j]<res[i-1][j-w[i-1]]+v[i-1]:
-				res[i][j]=res[i-1][j-w[i-1]]+v[i-1]
-	return res
- 
-def show(n,c,w,res):
-	print('最大价值为:',res[n][c])
-	x=[False for i in range(n)]
-	j=c
-	for i in range(1,n+1):
-		if res[i][j]>res[i-1][j]:
-			x[i-1]=True
-			j-=w[i-1]
-	print('选择的物品为:')
-	for i in range(n):
-		if x[i]:
-			print('第',i,'个,',end='')
-	print('')
- 
 if __name__=='__main__':
-	n=1000 #样本总量
-	c=5000 #背包大小
-	w=np.random.randint(1,200,1000) #宝物重量
-	v=np.random.randint(1,500,1000) #宝物价值
-	res=bag(n,c,w,v)
-	show(n,c,w,res)
-
+	data = json.load(open(r'testdata/testdata(9).json'))
+	data_set = []
+	for i in range(1,10):
+		data_set.append(data["data"+str(i)])
+	times = []
+	values = []
+	current_data = {"package_weight":8000,"weight":np.random.randint(1,200,300),"price":np.random.randint(1,200,300)}
+	for i in range(4):
+		best = 0
+		starttime = time.time()
+		if i == 0:
+			value = gr.bag(current_data["package_weight"],current_data["weight"],current_data["price"])
+		elif i == 1:
+			value = pso.pso(current_data["weight"],current_data["price"],current_data["package_weight"],20,200)
+		elif i == 2:
+			value = sa.SAA(current_data["weight"],current_data["price"],current_data["package_weight"],100,time=50)
+		elif i == 3:
+			value = fa.pso(current_data["weight"],current_data["price"],current_data["package_weight"],20,200)
+		endtime = time.time()
+		times.append(endtime-starttime)
+		values.append(value)
+	plt.subplot(1,2,1)
+	plt.ylabel("best value")
+	plt.bar(["greedy","PSO","SA","FA"],values)
+	plt.subplot(1,2,2)
+	plt.ylabel("time")
+	plt.bar(["greedy","PSO","SA","FA"],times)
+	plt.show()
