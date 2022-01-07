@@ -1,6 +1,7 @@
 import random
 import math
 import copy
+import numpy as np
 
 def calc_price(solv,price):
     #计算背包价值
@@ -21,14 +22,12 @@ def calc_weight(slove,weight):
     return res
 
 
-def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, time = 20, balance = 5):
+def SAA(weight = None, price = None, pw = 0, T = 200, af = 0.95, time = 20, balance = 5, bestt = None):
     '''
     模拟退火算法
     ------------------------------------------------
     输入：
     ------------------------------------------------
-    初始解集init[dimensionality] 请确保初始解集合法
-    
     重量weight[dimensionality]
     
     价值price[dimensionality]
@@ -48,6 +47,7 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
     ------------------------------------------------
     解集res[dimensionality]
     '''
+    init = [0] * len(weight)
     c = len(init) - 1
     best = copy.deepcopy(init) #全局最优解
     now = copy.deepcopy(init)
@@ -100,8 +100,11 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
         if T < 10:
             #print('到达最小温度阈值')
             break #到达最小温度阈值
-    
-    return best
+        
+        if bestt:
+            if np.abs(now_price-bestt) <= 0.01*bestt:
+                break
+    return calc_price(best,price)
             
                         
 if __name__ == '__main__':
@@ -113,10 +116,10 @@ if __name__ == '__main__':
     init = [0] * len(weight)
     pw = 1173
 
-    best = saa(init=init, weight=weight, price=price, pw=pw, time=1000, T=50000,af = 0.95,balance=20)
+    best = SAA(init=init, weight=weight, price=price, pw=pw, time=1000, T=50000,af = 0.95,balance=20)
     print('最优解为',calc_price(best,price))
     print('背包重量',calc_weight(best,weight))
-    saa()
+    SAA()
         
             
 

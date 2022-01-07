@@ -49,10 +49,14 @@ def point_variation(bits,group,p=0.005):
     return group   
 
 def update_vx(v,x,p_best,g_best):
-    new_x = x.copy()
+    new_x = x
     for k,ind in enumerate(v):
         for i in range(len(ind)):
             ind[i] = ind[i] + np.random.rand()*(p_best[k][i] - ind[i]) + np.random.rand()*(g_best[i] - ind[i])
+            if ind[i] > 1:
+                ind[i] = 1
+            elif ind[i] <= 0:
+                ind[i] = 1e-15
             if np.random.rand() <= 1/(1+math.exp(-ind[i])):
                 new_x[k][i] = 1
             else:
@@ -71,11 +75,9 @@ def update_pg(x,fit_res,p_best,g_best,w,p,pa):
     return p_best,g_best
 
 
-def SGA(package_weight,weight,price,individuals = None,iters = 100,crossover=0.8,variation=0.005):
+def SGA(package_weight,weight,price,individuals = None,iters = 100,crossover=0.8,variation=0.005,best=None):
     """
     SGA(package_weight,weight,price,individuals = None,iters = 100,crossover=0.8,variation=0.005)
-
-    警告：没有测试，有问题自己看着改，改不了再说warning:not tested
 
     SGA algorythm to solve 0-1kp
 
@@ -121,15 +123,15 @@ def SGA(package_weight,weight,price,individuals = None,iters = 100,crossover=0.8
         end_max.append(np.max(fit_result))
         end_ave.append(np.mean(fit_result))
         init_group = new_group
+        if best:
+            if np.abs(np.max(fit_result)-best) <= 0.01*best:
+                break
     plt.plot(end_max,'r-')
     plt.plot(end_ave,'b-')
-    plt.xlabel('iteration')  
-    plt.ylabel('fitness')  
-    plt.title('fitness curve')  
     plt.show()
-    return np.array(np.max(end_max))
+    return np.max(end_max)
 
-def DPSO(package_weight,weight,price,individuals = None,iters = 100):
+def DPSO(package_weight,weight,price,individuals = None,iters = 200):
     """
     DPSO(package_weight,weight,price,individuals = None,iters = 100)
     
@@ -172,11 +174,9 @@ def DPSO(package_weight,weight,price,individuals = None,iters = 100):
     fit_result = fitness(init_group,weight,price,package_weight)
     end_max.append(np.max(fit_result))
     end_ave.append(np.mean(fit_result))
-    p_best = np.zeros((individuals,dimension))
-    g_best = np.zeros(dimension)
     p_best = init_group
     g_best = init_group[np.argmax(fit_result)]
-    speed = np.random.randint(0,10,(individuals,dimension))/10
+    speed = np.random.randint(0,20,(init_individual,dimension))/10-1
     for it in range(iters):
         new_speed,new_x = update_vx(speed,init_group,p_best,g_best)
         new_fit = fitness(new_x,weight,price,package_weight)
