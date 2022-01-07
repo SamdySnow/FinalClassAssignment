@@ -1,6 +1,7 @@
 import random
 import math
 import copy
+from matplotlib import pyplot as plt
 
 def calc_price(solv,price):
     #计算背包价值
@@ -21,7 +22,7 @@ def calc_weight(slove,weight):
     return res
 
 
-def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, time = 20, balance = 5):
+def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, time = 20, balance = 5,minT = 0):
     '''
     模拟退火算法
     ------------------------------------------------
@@ -42,6 +43,8 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
     迭代次数time 默认为 20
 
     平衡次数balance 默认为 5
+
+    最小温度阈值minT 默认为 0
     
     ------------------------------------------------
     输出：
@@ -51,6 +54,8 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
     c = len(init) - 1
     best = copy.deepcopy(init) #全局最优解
     now = copy.deepcopy(init)
+
+    best_price_list = []
 
     for i in range(time):
 
@@ -97,10 +102,14 @@ def saa(init = None,weight = None, price = None, pw = 0, T = 200, af = 0.95, tim
                         now = copy.deepcopy(test)
             
         T = T*af #温度下降
-        if T < 10:
+        if T < minT:
             #print('到达最小温度阈值')
             break #到达最小温度阈值
-    
+
+        best_price_list.append(calc_price(best,price))
+
+    plt.plot(best_price_list)
+    plt.show()
     return best
             
                         
@@ -113,10 +122,10 @@ if __name__ == '__main__':
     init = [0] * len(weight)
     pw = 1173
 
-    best = saa(init=init, weight=weight, price=price, pw=pw, time=1000, T=50000,af = 0.95,balance=20)
+    best = saa(init=init, weight=weight, price=price, pw=pw,T=400,time=80,af = 0.65, balance = 20)
     print('最优解为',calc_price(best,price))
     print('背包重量',calc_weight(best,weight))
-    saa()
+    
         
             
 
