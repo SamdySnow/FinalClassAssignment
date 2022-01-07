@@ -195,3 +195,4 @@ def DPSO(package_weight,weight,price,individuals = None,iters = 200):
     plt.title('fitness curve')  
     plt.show()
     return np.array(np.max(end_max))
+    
